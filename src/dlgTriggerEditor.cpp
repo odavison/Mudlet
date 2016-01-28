@@ -6993,7 +6993,10 @@ void dlgTriggerEditor::slot_profileSaveAsAction()
                                                     tr("trigger files (*.trigger *.xml)"));
 
     if(fileName.isEmpty()) return;
-    fileName.append(".xml");
+    if (!fileName.endsWith(".xml"))
+    {
+        fileName.append(".xml");
+    }
 
     QFile file(fileName);
     if( ! file.open(QFile::WriteOnly | QFile::Text) )
