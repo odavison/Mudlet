@@ -6966,24 +6966,9 @@ void dlgTriggerEditor::doCleanReset()
 void dlgTriggerEditor::slot_profileSaveAction()
 {
     QString directory_xml = QDir::homePath()+"/.config/mudlet/profiles/"+mpHost->getName()+"/current";
+
     QString filename_xml = directory_xml + "/"+QDateTime::currentDateTime().toString("dd-MM-yyyy#hh-mm-ss")+".xml";
-    QDir dir_xml;
-    if( ! dir_xml.exists( directory_xml ) )
-    {
-        dir_xml.mkpath( directory_xml );
-    }
-    QFile file_xml( filename_xml );
-    if ( file_xml.open( QIODevice::WriteOnly ) )
-    {
-        XMLexport writer( mpHost );
-        writer.exportHost( & file_xml );
-        file_xml.close();
-        mpHost->saveModules(1);
-    }
-    else
-    {
-        QMessageBox::critical( this, "Profile Save Failed", "Failed to save "+mpHost->getName()+" to location "+filename_xml+" because of the following error: "+file_xml.errorString() );
-    }
+    writeProfile(directory_xml, filename_xml);
 }
 
 void dlgTriggerEditor::slot_profileSaveAsAction()
@@ -7007,6 +6992,27 @@ void dlgTriggerEditor::slot_profileSaveAsAction()
     XMLexport writer( mpHost, true );//just export a generic package without host element
     writer.exportGenericPackage( & file );
     file.close();
+}
+
+void dlgTriggerEditor::writeProfile( QString directory_xml, QString filename_xml )
+{
+    QDir dir_xml;
+    if( ! dir_xml.exists( directory_xml ) )
+    {
+        dir_xml.mkpath( directory_xml );
+    }
+    QFile file_xml( filename_xml );
+    if ( file_xml.open( QIODevice::WriteOnly ) )
+    {
+        XMLexport writer( mpHost );
+        writer.exportHost( & file_xml );
+        file_xml.close();
+        mpHost->saveModules(1);
+    }
+    else
+    {
+        QMessageBox::critical( this, "Profile Save Failed", "Failed to save "+mpHost->getName()+" to location "+filename_xml+" because of the following error: "+file_xml.errorString() );
+    }
 }
 
 bool dlgTriggerEditor::event( QEvent * event )

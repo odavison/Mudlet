@@ -205,6 +205,7 @@ private:
     void                        saveAction();
     void                        readSettings();
     void                        writeSettings();
+    void                        writeProfile( QString directory, QString filename );
     void                        addScript( bool );
     void                        addAlias( bool );
     void                        addTimer( bool isFolder );
