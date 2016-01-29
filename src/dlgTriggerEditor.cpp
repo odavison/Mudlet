@@ -6969,6 +6969,9 @@ void dlgTriggerEditor::slot_profileSaveAction()
 
     QString filename_xml = directory_xml + "/"+QDateTime::currentDateTime().toString("dd-MM-yyyy#hh-mm-ss")+".xml";
     writeProfile(directory_xml, filename_xml);
+
+    filename_xml = directory_xml + "/profile.xml";
+    writeProfile(directory_xml, filename_xml);
 }
 
 void dlgTriggerEditor::slot_profileSaveAsAction()
