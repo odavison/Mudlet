@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8.2)
 
 include(CTest)
 
+##############
+# GTest
+##############
 if (CMAKE_VERSION VERSION_LESS 3.2)
     set(UPDATE_DISCONNECTED_IF_AVAILABLE "")
 else()
@@ -34,6 +37,19 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 # Trivial example using gtest and gmock
-add_executable(TArea_test TArea_test.cpp)
-target_link_libraries(TArea_test gtest gmock_main)
-add_test(NAME TArea_test COMMAND TArea_test)
+add_executable(example_gtest example_gtest.cpp)
+target_link_libraries(example_gtest gtest gmock_main)
+add_test(NAME example_gtest COMMAND example_gtest)
+
+############
+# Qt5Test
+############
+# Tell CMake to run moc when necessary:
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt5Test REQUIRED)
+
+add_executable(example_qttest example_qttest.cpp)
+add_test(example_qttest example_qttest)
+
+target_link_libraries(example_qttest Qt5::Test)

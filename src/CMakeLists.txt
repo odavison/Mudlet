@@ -199,6 +199,15 @@ SET(mudlet_HDRS
 
 ADD_SUBDIRECTORY(irc)
 
+SET(LUA_CPP OFF CACHE BOOL "Lua is compiled as C++ rather than C")
+
+IF(LUA_CPP)
+  ADD_DEFINITIONS(-DLUA_CPP)
+  SET(mudlet_SRCS ${mudlet_SRCS} lua_yajl.cpp)
+ELSE(LUA_CPP)
+  SET(mudlet_SRCS ${mudlet_SRCS} lua_yajl.c)
+ENDIF(LUA_CPP)
+
 QT5_WRAP_UI(mudlet_UIS_H ${mudlet_UIS})
 QT5_WRAP_CPP(mudlet_MOC_SRCS ${mudlet_MOC_HDRS})
 QT5_ADD_RESOURCES(mudlet_RCC_SRCS ${mudlet_RCCS})
