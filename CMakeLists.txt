@@ -70,4 +70,10 @@ SET(APP_BUILD "-dev")
 # assigned to the "VERSION" and "BUILD" variables in the native qmake project file,
 # i.e. ./src/src.pro
 
+# For YouCompleteMe
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+
 ADD_SUBDIRECTORY(src)
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
+ADD_SUBDIRECTORY(test)
