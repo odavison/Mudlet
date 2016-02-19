@@ -38,7 +38,60 @@ class TRoom;
 class TRoomDB
 {
 public:
-    TRoomDB( TMap * );
+    virtual TRoom * getRoom( int id ) = 0;
+    virtual TArea * getArea( int id ) = 0;
+//    int getArea( TArea * pA ); use duplicate int getAreaID( TArea * pA ) instead
+    virtual bool addRoom( int id ) = 0;
+    virtual int size() = 0;
+    virtual bool removeRoom( int ) = 0;
+    virtual void removeRoom( QList<int> & ) = 0;
+    virtual bool removeArea( int id ) = 0;
+    virtual bool removeArea( QString name ) = 0;
+    virtual void removeArea( TArea * ) = 0;
+    virtual bool addArea(int id) = 0;
+    virtual int addArea( QString name ) = 0;
+    virtual bool addArea( int id, QString name ) = 0;
+    virtual bool setAreaName( int areaID, QString name ) = 0;
+    virtual const QList<TRoom *> getRoomPtrList() = 0;
+    virtual const QList<TArea *> getAreaPtrList() = 0;
+    virtual const QHash<int, TRoom *> & getRoomMap() const = 0;
+    virtual const QMap<int, TArea *> & getAreaMap() const = 0;
+    virtual QList<int> getRoomIDList() = 0;
+    virtual QList<int> getAreaIDList() = 0;
+    virtual const QMap<int, QString> & getAreaNamesMap() const = 0;
+    virtual void updateEntranceMap(TRoom *, bool isMapLoading = false ) = 0;
+    virtual void updateEntranceMap(int) = 0;
+    virtual const QMultiHash<int, int> & getEntranceHash() = 0;
+    virtual void deleteValuesFromEntranceMap( int ) = 0;
+    virtual void deleteValuesFromEntranceMap( QSet<int> & ) = 0;
+
+    virtual void buildAreas() = 0;
+    virtual void clearMapDB() = 0;
+    virtual void initAreasForOldMaps() = 0;
+    virtual void auditRooms() = 0;
+    virtual bool addRoom(int id, TRoom *pR, bool isMapLoading = false) = 0;
+    virtual int getAreaID(TArea * pA) = 0;
+    virtual void restoreAreaMap( QDataStream & ) = 0;
+    virtual void restoreSingleArea( QDataStream &, int, TArea * ) = 0;
+    virtual void restoreSingleRoom( QDataStream &, int, TRoom * ) = 0;
+    virtual QMap<QString,int> hashTable;
+    virtual ~TRoomDB() {};
+
+
+
+private:
+    bool __removeRoom( int id );
+
+    friend class TRoom;//friend TRoom::~TRoom();
+    //friend class TMap;//bool TMap::restore(QString location);
+    //friend bool TMap::serialize(QDataStream &);
+    friend class XMLexport;
+};
+
+class ConcreteTRoomDB: TRoomDB
+{
+public:
+    ConcreteTRoomDB( TMap * );
 
     TRoom * getRoom( int id );
     TArea * getArea( int id );
@@ -81,7 +134,7 @@ public:
 
 
 private:
-    TRoomDB(){}
+    ConcreteTRoomDB(){};
     int createNewAreaID();
     bool __removeRoom( int id );
 
