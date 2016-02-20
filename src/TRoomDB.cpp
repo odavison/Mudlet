@@ -34,14 +34,14 @@
 #include "post_guard.h"
 
 
-TRoomDB::TRoomDB( TMap * pMap )
+ConcreteTRoomDB::ConcreteTRoomDB( TMap * pMap )
 : mpMap( pMap )
 , mUnnamedAreaName( qApp->translate( "TRoomDB", "Unnamed Area" ) )
 , mpTempRoomDeletionList( 0 )
 {
 }
 
-TRoom * TRoomDB::getRoom( int id )
+TRoom * ConcreteTRoomDB::getRoom( int id )
 {
     if (id < 0)
         return 0;
@@ -51,12 +51,12 @@ TRoom * TRoomDB::getRoom( int id )
     return 0;
 }
 
-bool TRoomDB::addRoom( int id )
+bool ConcreteTRoomDB::addRoom( int id )
 {
     qDebug()<<"addRoom("<<id<<")";
     if( !rooms.contains( id ) && id > 0 )
     {
-        rooms[id] = new TRoom( this );
+        rooms[id] = new TRoom( mpMap, this );
         rooms[id]->setId(id);
         // there is no point to update the entranceMap here, as the room has no exit information
         return true;
@@ -72,7 +72,7 @@ bool TRoomDB::addRoom( int id )
     }
 }
 
-bool TRoomDB::addRoom( int id, TRoom * pR, bool isMapLoading )
+bool ConcreteTRoomDB::addRoom( int id, TRoom * pR, bool isMapLoading )
 {
     if( !rooms.contains( id ) && id > 0 && pR )
     {
@@ -87,7 +87,7 @@ bool TRoomDB::addRoom( int id, TRoom * pR, bool isMapLoading )
     }
 }
 
-void TRoomDB::deleteValuesFromEntranceMap( int value )
+void ConcreteTRoomDB::deleteValuesFromEntranceMap( int value )
 {
     QList<int> keyList = entranceMap.keys();
     QList<int> valueList = entranceMap.values();
@@ -102,7 +102,7 @@ void TRoomDB::deleteValuesFromEntranceMap( int value )
     }
 }
 
-void TRoomDB::deleteValuesFromEntranceMap( QSet<int> & valueSet )
+void ConcreteTRoomDB::deleteValuesFromEntranceMap( QSet<int> & valueSet )
 {
     QElapsedTimer timer;
     timer.start();
@@ -119,16 +119,16 @@ void TRoomDB::deleteValuesFromEntranceMap( QSet<int> & valueSet )
     for (uint i = 0; i < deleteEntries.size(); ++i) {
         entranceMap.remove( keyList.at(deleteEntries.at(i)), valueList.at(deleteEntries.at(i)) );
     }
-    qDebug() << "TRoomDB::deleteValuesFromEntranceMap() with a list of:" << valueSet.size() << "items, run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
+    qDebug() << "ConcreteTRoomDB::deleteValuesFromEntranceMap() with a list of:" << valueSet.size() << "items, run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
 }
 
-void TRoomDB::updateEntranceMap(int id)
+void ConcreteTRoomDB::updateEntranceMap(int id)
 {
     TRoom * pR = getRoom(id);
     updateEntranceMap(pR);
 }
 
-void TRoomDB::updateEntranceMap(TRoom * pR, bool isMapLoading)
+void ConcreteTRoomDB::updateEntranceMap(TRoom * pR, bool isMapLoading)
 {
     static bool showDebug = false; // Enable this at runtime (set a breakpoint on it) for debugging!
 
@@ -164,17 +164,17 @@ void TRoomDB::updateEntranceMap(TRoom * pR, bool isMapLoading)
                 values.chop(1);
             }
             if( values.isEmpty() ) {
-                qDebug( "TRoomDB::updateEntranceMap(TRoom * pR) called for room with Id:%i, it is not an Entrance for any Rooms.", id );
+                qDebug( "ConcreteTRoomDB::updateEntranceMap(TRoom * pR) called for room with Id:%i, it is not an Entrance for any Rooms.", id );
             }
             else {
-                qDebug( "TRoomDB::updateEntranceMap(TRoom * pR) called for room with Id:%i, it is an Entrance for Room(s): %s.", id, values.toLatin1().constData() );
+                qDebug( "ConcreteTRoomDB::updateEntranceMap(TRoom * pR) called for room with Id:%i, it is an Entrance for Room(s): %s.", id, values.toLatin1().constData() );
             }
         }
     }
 }
 
 // this is call by TRoom destructor only
-bool TRoomDB::__removeRoom( int id )
+bool ConcreteTRoomDB::__removeRoom( int id )
 {
     static QMultiHash<int, int> _entranceMap; // Make it persistant - for multiple room deletions
     static bool isBulkDelete = false;
@@ -182,7 +182,7 @@ bool TRoomDB::__removeRoom( int id )
     // _entranceMap the first time around for multi-room deletions
 
     TRoom * pR = getRoom(id);
-    // This will FAIL during map deletion as TRoomDB::rooms has already been
+    // This will FAIL during map deletion as ConcreteTRoomDB::rooms has already been
     // zapped, so can use to skip everything...
     if (pR) {
         if( mpTempRoomDeletionList && mpTempRoomDeletionList->size() > 1 ) { // We are deleting multiple rooms
@@ -246,12 +246,12 @@ bool TRoomDB::__removeRoom( int id )
             ++i;
         }
         rooms.remove(id);
-        // FIXME: make hashTable a bimap
-        QList<QString> keyList = hashTable.keys();
-        QList<int> valueList = hashTable.values();
+        // FIXME: make roomIDByHash a bimap
+        QList<QString> keyList = roomIDByHash.keys();
+        QList<int> valueList = roomIDByHash.values();
         for (int i = 0; i < valueList.size(); i++) {
             if (valueList[i] == id) {
-                hashTable.remove(keyList[i]);
+                roomIDByHash.remove(keyList[i]);
             }
         }
         int areaID = pR->getArea();
@@ -271,7 +271,7 @@ bool TRoomDB::__removeRoom( int id )
     return false;
 }
 
-bool TRoomDB::removeRoom( int id )
+bool ConcreteTRoomDB::removeRoom( int id )
 {
     if( rooms.contains( id ) && id > 0 ) {
         if( mpMap->mRoomId == id ) {
@@ -287,7 +287,7 @@ bool TRoomDB::removeRoom( int id )
     return false;
 }
 
-void TRoomDB::removeRoom( QList<int> & ids )
+void ConcreteTRoomDB::removeRoom( QList<int> & ids )
 {
     QElapsedTimer timer;
     timer.start();
@@ -314,10 +314,10 @@ void TRoomDB::removeRoom( QList<int> & ids )
     deleteValuesFromEntranceMap( deletedRoomIds );
     mpTempRoomDeletionList->clear();
     mpTempRoomDeletionList=0;
-    qDebug() << "TRoomDB::removeRoom(QList<int>) run time for" << roomcount << "rooms:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
+    qDebug() << "ConcreteTRoomDB::removeRoom(QList<int>) run time for" << roomcount << "rooms:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
 }
 
-bool TRoomDB::removeArea( int id )
+bool ConcreteTRoomDB::removeArea( int id )
 {
     if( areas.contains( id ) ) {
         TArea * pA = areas.value( id );
@@ -342,7 +342,7 @@ bool TRoomDB::removeArea( int id )
     return false;
 }
 
-bool TRoomDB::removeArea( QString name )
+bool ConcreteTRoomDB::removeArea( QString name )
 {
     if( areaNamesMap.values().contains( name ) ) {
         return removeArea( areaNamesMap.key( name ) ); // i.e. call the removeArea(int) method
@@ -352,10 +352,10 @@ bool TRoomDB::removeArea( QString name )
     }
 }
 
-void TRoomDB::removeArea( TArea * pA )
+void ConcreteTRoomDB::removeArea( TArea * pA )
 {
     if( ! pA ) {
-        qWarning( "TRoomDB::removeArea(TArea *) Warning - attempt to remove an area with a NULL TArea pointer!" );
+        qWarning( "ConcreteTRoomDB::removeArea(TArea *) Warning - attempt to remove an area with a NULL TArea pointer!" );
         return;
     }
 
@@ -366,16 +366,16 @@ void TRoomDB::removeArea( TArea * pA )
         removeArea( areaId );
     }
     else {
-        qWarning( "TRoomDB::removeArea(TArea *) Warning - attempt to remove an area NOT in TRoomDB::areas!" );
+        qWarning( "ConcreteTRoomDB::removeArea(TArea *) Warning - attempt to remove an area NOT in ConcreteTRoomDB::areas!" );
     }
 }
 
-int TRoomDB::getAreaID( TArea * pA )
+int ConcreteTRoomDB::getAreaID( TArea * pA )
 {
     return areas.key(pA);
 }
 
-void TRoomDB::buildAreas()
+void ConcreteTRoomDB::buildAreas()
 {
     QElapsedTimer timer;
     timer.start();
@@ -404,21 +404,21 @@ void TRoomDB::buildAreas()
            areas[id] = new TArea( mpMap, this );
        }
     }
-    qDebug() << "TRoomDB::buildAreas() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
+    qDebug() << "ConcreteTRoomDB::buildAreas() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
 }
 
 
-const QList<TRoom *> TRoomDB::getRoomPtrList()
+const QList<TRoom *> ConcreteTRoomDB::getRoomPtrList()
 {
     return rooms.values();
 }
 
-QList<int> TRoomDB::getRoomIDList()
+QList<int> ConcreteTRoomDB::getRoomIDList()
 {
     return rooms.keys();
 }
 
-TArea * TRoomDB::getArea( int id )
+TArea * ConcreteTRoomDB::getArea( int id )
 {
     //area id of -1 is a room in the "void", 0 is a failure
     if( id > 0 || id == -1 ) {
@@ -429,14 +429,42 @@ TArea * TRoomDB::getArea( int id )
     }
 }
 
-bool TRoomDB::setAreaName( int areaID, QString name )
+void ConcreteTRoomDB::putRoomIDByHash( QString hash, int id )
+{
+  roomIDByHash.insert( hash, id );
+}
+
+int ConcreteTRoomDB::getRoomIDByHash( QString hash )
+{
+  auto element = roomIDByHash.constFind( hash );
+
+  if ( element != roomIDByHash.constEnd() )
+  {
+    return element.value();
+  } else {
+    // Only room elements > 0 are valid.
+    return 0;
+  }
+}
+
+void ConcreteTRoomDB::writeRoomIDByHashTable( QDataStream & ofs )
+{
+  ofs << roomIDByHash;
+}
+
+void ConcreteTRoomDB::readRoomIDByHashTable( QDataStream & ifs )
+{
+  ifs >> roomIDByHash;
+}
+
+bool ConcreteTRoomDB::setAreaName( int areaID, QString name )
 {
     if( areaID < 1 ) {
-        qWarning( "TRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Suspect areaID: %d supplied.", areaID );
+        qWarning( "ConcreteTRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Suspect areaID: %d supplied.", areaID );
         return false;
     }
     if( name.isEmpty() ) {
-        qWarning( "TRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Empty name supplied." );
+        qWarning( "ConcreteTRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Empty name supplied." );
         return false;
     }
     else if( areaNamesMap.values().count(name) > 0 ) {
@@ -446,7 +474,7 @@ bool TRoomDB::setAreaName( int areaID, QString name )
             return true;
         }
         else {
-            qWarning( "TRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Duplicate name supplied \"%s\"- that is not a good idea!", name.toUtf8().constData() );
+            qWarning( "ConcreteTRoomDB::setAreaName((int)areaID, (QString)name): WARNING: Duplicate name supplied \"%s\"- that is not a good idea!", name.toUtf8().constData() );
             return false;
         }
     }
@@ -458,7 +486,7 @@ bool TRoomDB::setAreaName( int areaID, QString name )
     return true;
 }
 
-bool TRoomDB::addArea( int id )
+bool ConcreteTRoomDB::addArea( int id )
 {
     if( ! areas.contains( id ) ) {
         areas[id] = new TArea( mpMap, this );
@@ -477,13 +505,13 @@ bool TRoomDB::addArea( int id )
         return true;
     }
     else {
-        QString error = qApp->translate( "TRoomDB", "Area with ID=%1 already exists!" ).arg(id);
+        QString error = qApp->translate( "ConcreteTRoomDB", "Area with ID=%1 already exists!" ).arg(id);
         mpMap->logError(error);
         return false;
     }
 }
 
-int TRoomDB::createNewAreaID()
+int ConcreteTRoomDB::createNewAreaID()
 {
     int id = 1;
     while( areas.contains( id ) ) {
@@ -492,16 +520,16 @@ int TRoomDB::createNewAreaID()
     return id;
 }
 
-int TRoomDB::addArea( QString name )
+int ConcreteTRoomDB::addArea( QString name )
 {
     // reject it if area name already exists or is empty
     if( name.isEmpty() ) {
-        QString error = qApp->translate( "TRoomDB", "An Unnamed Area is (no longer) permitted!" );
+        QString error = qApp->translate( "ConcreteTRoomDB", "An Unnamed Area is (no longer) permitted!" );
         mpMap->logError(error);
         return 0;
     }
     else if( areaNamesMap.values().contains( name ) ) {
-        QString error = qApp->translate( "TRoomDB", "An area called %1 already exists!" ).arg(name);
+        QString error = qApp->translate( "ConcreteTRoomDB", "An area called %1 already exists!" ).arg(name);
         mpMap->logError(error);
         return 0;
     }
@@ -522,7 +550,7 @@ int TRoomDB::addArea( QString name )
 // NOTE: we no longer accept duplicate IDs or duplicate area names
 //       duplicate definitions are ignored
 //       Unless the area name is empty, in which case we provide one!
-bool TRoomDB::addArea( int id, QString name )
+bool ConcreteTRoomDB::addArea( int id, QString name )
 {
     if(   ( ( ! name.isEmpty() ) && areaNamesMap.values().contains( name ) )
        || areaNamesMap.keys().contains( id ) ) {
@@ -541,17 +569,17 @@ bool TRoomDB::addArea( int id, QString name )
     }
 }
 
-const QList<TArea *> TRoomDB::getAreaPtrList()
+const QList<TArea *> ConcreteTRoomDB::getAreaPtrList()
 {
     return areas.values();
 }
 
-QList<int> TRoomDB::getAreaIDList()
+QList<int> ConcreteTRoomDB::getAreaIDList()
 {
     return areas.keys();
 }
 
-void TRoomDB::auditRooms()
+void ConcreteTRoomDB::auditRooms()
 {
     QElapsedTimer timer;
     timer.start();
@@ -564,10 +592,10 @@ void TRoomDB::auditRooms()
         pR->auditExits();
 
     }
-    qDebug() << "TRoomDB::auditRooms() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
+    qDebug() << "ConcreteTRoomDB::auditRooms() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
 }
 
-void TRoomDB::initAreasForOldMaps()
+void ConcreteTRoomDB::initAreasForOldMaps()
 {
     buildAreas();
 
@@ -590,19 +618,19 @@ void TRoomDB::initAreasForOldMaps()
     }
 }
 
-void TRoomDB::clearMapDB()
+void ConcreteTRoomDB::clearMapDB()
 {
     QElapsedTimer timer;
     timer.start();
     QList<TRoom*> rPtrL = getRoomPtrList();
-    rooms.clear(); // Prevents any further use of TRoomDB::getRoom(int) !!!
+    rooms.clear(); // Prevents any further use of ConcreteTRoomDB::getRoom(int) !!!
     entranceMap.clear();
     areaNamesMap.clear();
-    hashTable.clear();
+    roomIDByHash.clear();
     for( uint i=0; i<rPtrL.size(); i++ )
     {
         delete rPtrL.at(i); // Uses the internally held value of the room Id
-                            // (TRoom::id) to call TRoomDB::__removeRoom(id)
+                            // (TRoom::id) to call ConcreteTRoomDB::__removeRoom(id)
     }
 //    assert( rooms.size() == 0 ); // Pointless as rooms.clear() will have achieved the test condition
 
@@ -612,10 +640,10 @@ void TRoomDB::clearMapDB()
         delete areaList.at(i);
     }
     assert( areas.size() == 0 );
-    qDebug() << "TRoomDB::clearMapDB() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
+    qDebug() << "ConcreteTRoomDB::clearMapDB() run time:" << timer.nsecsElapsed() * 1.0e-9 << "sec.";
 }
 
-void TRoomDB::restoreAreaMap( QDataStream & ifs )
+void ConcreteTRoomDB::restoreAreaMap( QDataStream & ifs )
 {
     QMap<int, QString> areaNamesMapWithPossibleEmptyOrDuplicateItems;
     ifs >> areaNamesMapWithPossibleEmptyOrDuplicateItems;
@@ -676,14 +704,14 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
         QString extraTextForMatchingSuffixAlreadyUsed;
         QString detailText;
         if( isMatchingSuffixAlreadyPresent ) {
-            extraTextForMatchingSuffixAlreadyUsed = qApp->translate( "TRoomDB", "It has been detected that \"_###\" form suffixes have already been used, for "
+            extraTextForMatchingSuffixAlreadyUsed = qApp->translate( "ConcreteTRoomDB", "It has been detected that \"_###\" form suffixes have already been used, for "
                                                                                 "simplicity in the renaming algorithm these will have been removed and possibly "
                                                                                 "changed as Mudlet sorts this matter out, if a number assigned in this way "
                                                                                 "<b>is</b> important to you, you can change it back, provided you rename the area "
                                                                                 "that has been allocated the suffix that was wanted first...!</p>" );
         }
         if( renamedMap.size() ) {
-            detailText = qApp->translate( "TRoomDB", "[  OK  ]  - The changes made are:\n"
+            detailText = qApp->translate( "ConcreteTRoomDB", "[  OK  ]  - The changes made are:\n"
                                                                  "(ID) \"old name\" ==> \"new name\"\n" );
             QMapIterator<QString, QString> itRemappedNames = renamedMap;
             itRemappedNames.toBack();
@@ -692,7 +720,7 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
                 itRemappedNames.previous();
                 detailText.append( QStringLiteral( "(%1) \"%2\" ==> \"%3\"\n" )
                                    .arg( areaNamesMap.key( itRemappedNames.value() ) )
-                                   .arg( itRemappedNames.key().isEmpty() ? qApp->translate( "TRoomDB", "<nothing>" ) : itRemappedNames.key() )
+                                   .arg( itRemappedNames.key().isEmpty() ? qApp->translate( "ConcreteTRoomDB", "<nothing>" ) : itRemappedNames.key() )
                                    .arg( itRemappedNames.value() ) );
             }
             detailText.chop(1); // Trim last "\n" off
@@ -700,8 +728,8 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
         if( renamedMap.size() && isEmptyAreaNamePresent ) {
             // At least one unnamed area and at least one duplicate area name
             // - may be the same items
-            alertText = qApp->translate( "TRoomDB", "[ ALERT ] - Empty and duplicate area names detected in Map file!" );
-            informativeText = qApp->translate( "TRoomDB", "[ INFO ]  - Due to some situations not being checked in the past,  Mudlet had\n"
+            alertText = qApp->translate( "ConcreteTRoomDB", "[ ALERT ] - Empty and duplicate area names detected in Map file!" );
+            informativeText = qApp->translate( "ConcreteTRoomDB", "[ INFO ]  - Due to some situations not being checked in the past,  Mudlet had\n"
                                                                       "allowed the map to have more than one area with the same or no name.\n"
                                                                       "These make some things confusing and are now disallowed.\n"
                                                                       "  To resolve these cases, an area without a name here (or created in\n"
@@ -720,8 +748,8 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
         }
         else if( renamedMap.size() ) {
             // Duplicates but no unnnamed area
-            alertText = qApp->translate( "TRoomDB", "[ ALERT ] - Duplicate area names detected in the Map file!" );
-            informativeText = qApp->translate( "TRoomDB", "[ INFO ]  - Due to some situations not being checked in the past, Mudlet had\n"
+            alertText = qApp->translate( "ConcreteTRoomDB", "[ ALERT ] - Duplicate area names detected in the Map file!" );
+            informativeText = qApp->translate( "ConcreteTRoomDB", "[ INFO ]  - Due to some situations not being checked in the past, Mudlet had\n"
                                                                       "allowed the user to have more than one area with the same name.\n"
                                                                       "These make some things confusing and are now disallowed.\n"
                                                                       "  Duplicated area names will cause all but the first encountered one\n"
@@ -737,10 +765,10 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
         }
         else {
             // A single unnamed area found
-            alertText = qApp->translate( "TRoomDB", "[ ALERT ] - An empty area name was detected in the Map file!" );
+            alertText = qApp->translate( "ConcreteTRoomDB", "[ ALERT ] - An empty area name was detected in the Map file!" );
             // Use OK for this one because it is the last part and indicates the
             // sucessful end of something, whereas INFO is an intermediate step
-            informativeText = qApp->translate( "TRoomDB", "[  OK  ]  - Due to some situations not being checked in the past, Mudlet had\n"
+            informativeText = qApp->translate( "ConcreteTRoomDB", "[  OK  ]  - Due to some situations not being checked in the past, Mudlet had\n"
                                                                       "allowed the map to have an area with no name. This can make some\n"
                                                                       "things confusing and is now disallowed.\n"
                                                                       "  To resolve this case, the area without a name here (or one created\n"
@@ -761,12 +789,12 @@ void TRoomDB::restoreAreaMap( QDataStream & ifs )
     }
 }
 
-void TRoomDB::restoreSingleArea(QDataStream & ifs, int areaID, TArea * pA )
+void ConcreteTRoomDB::restoreSingleArea(QDataStream & ifs, int areaID, TArea * pA )
 {
     areas[areaID] = pA;
 }
 
-void TRoomDB::restoreSingleRoom(QDataStream & ifs, int i, TRoom *pT)
+void ConcreteTRoomDB::restoreSingleRoom(QDataStream & ifs, int i, TRoom *pT)
 {
     addRoom(i, pT, true);
 }

@@ -42,7 +42,7 @@
 
 
 TMap::TMap( Host * pH )
-: mpRoomDB( new TRoomDB( this ) )
+: mpRoomDB( new ConcreteTRoomDB( this ) )
 , mpHost( pH )
 , mpM( 0 )
 , mpMapper( 0 )
@@ -976,7 +976,7 @@ bool TMap::serialize( QDataStream & ofs )
     ofs << envColors;
     ofs << mpRoomDB->getAreaNamesMap();
     ofs << customEnvColors;
-    ofs << mpRoomDB->hashTable;
+    mpRoomDB->writeRoomIDByHashTable( ofs );
     if( mSaveVersion >= 17 ) {
         ofs << mUserData;
     }
@@ -1215,7 +1215,7 @@ bool TMap::restore(QString location)
             ifs >> customEnvColors;
         }
         if( mVersion >= 7 ) {
-            ifs >> mpRoomDB->hashTable;
+            mpRoomDB->readRoomIDByHashTable( ifs );
         }
         if( mVersion >= 17 ) {
             ifs >> mUserData;
@@ -1313,7 +1313,7 @@ bool TMap::restore(QString location)
         while( ! ifs.atEnd() ) {
             int i;
             ifs >> i;
-            TRoom * pT = new TRoom(mpRoomDB);
+            TRoom * pT = new TRoom(this, mpRoomDB);
             pT->restore( ifs, i, mVersion );
             mpRoomDB->restoreSingleRoom( ifs, i, pT );
         }

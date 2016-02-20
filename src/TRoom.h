@@ -49,12 +49,13 @@
 
 class XMLimport;
 class XMLexport;
+class TMap;
 class TRoomDB;
 
 class TRoom
 {
 public:
-    TRoom( TRoomDB* pRDB );
+    TRoom( TMap* pMap, TRoomDB* pRDB );
     ~TRoom();
     void setId( int );
     bool setExit( int to, int direction );
@@ -161,6 +162,7 @@ private:
     QMultiMap<int, QString> other; // es knnen mehrere exits zum gleichen raum verlaufen
                                    //verbotene exits werden mit 0 geprefixed, offene mit 1
 
+    TMap * mpMap;
     TRoomDB * mpRoomDB;
     friend class XMLimport;
     friend class XMLexport;

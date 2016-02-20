@@ -24,6 +24,7 @@
 
 
 #include "TArea.h"
+#include "TMap.h"
 #include "TRoomDB.h"
 
 #include "pre_guard.h"
@@ -35,7 +36,7 @@
 #include "post_guard.h"
 
 
-TRoom::TRoom(TRoomDB * pRDB)
+TRoom::TRoom(TMap * pMap, TRoomDB * pRDB)
 : x( 0 )
 , y( 0 )
 , z( 0 )
@@ -64,6 +65,7 @@ TRoom::TRoom(TRoomDB * pRDB)
 , down( -1 )
 , in( -1 )
 , out( -1 )
+, mpMap( pMap )
 , mpRoomDB( pRDB )
 {
 }
@@ -106,7 +108,7 @@ void TRoom::setExitStub(int direction, bool status)
         else
         {
             QString error = QString("Set exit stub in given direction in RoomID(%1) - there is already an exit there!").arg( id );
-            mpRoomDB->mpMap->logError(error);
+            mpMap->logError(error);
         }
     }
     else
@@ -151,14 +153,14 @@ void TRoom::setExitWeight(const QString& cmd, int w )
     if( w > 0 )
     {
         exitWeights[ cmd ] = w;
-        if( mpRoomDB && mpRoomDB->mpMap )
-            mpRoomDB->mpMap->mMapGraphNeedsUpdate = true;
+        if( mpMap )
+            mpMap->mMapGraphNeedsUpdate = true;
     }
     else if( exitWeights.contains( cmd ) )
     {
         exitWeights.remove( cmd );
-        if( mpRoomDB && mpRoomDB->mpMap )
-            mpRoomDB->mpMap->mMapGraphNeedsUpdate = true;
+        if( mpMap )
+            mpMap->mMapGraphNeedsUpdate = true;
     }
 }
 
@@ -203,7 +205,7 @@ bool TRoom::setArea( int areaID, bool isToDeferAreaRelatedRecalculations )
         pA = mpRoomDB->getArea( areaID );
         if( ! pA ) { // Oh, dear THAT didn't work
             QString error = qApp->translate( "TRoom", "No area created!  Requested area ID=%1. Note: Area IDs must be > 0" ).arg( areaID );
-            mpRoomDB->mpMap->logError(error);
+            mpMap->logError(error);
             return false;
         }
     }
@@ -224,7 +226,7 @@ bool TRoom::setArea( int areaID, bool isToDeferAreaRelatedRecalculations )
     }
     else {
         QString error = qApp->translate( "TRoom", "Warning: When setting the Area for Room (Id: %1) it did not have a current area!").arg( id );
-        mpRoomDB->mpMap->logError( error );
+        mpMap->logError( error );
     }
 
     area = areaID;
@@ -559,14 +561,14 @@ void TRoom::setSpecialExit( int to, const QString& cmd )
         // This updates the (TArea *)->exits map even for exit REMOVALS
     }
     mpRoomDB->updateEntranceMap(this);
-    mpRoomDB->mpMap->mMapGraphNeedsUpdate = true;
+    mpMap->mMapGraphNeedsUpdate = true;
 }
 
 void TRoom::clearSpecialExits()
 {
     other.clear();
     mpRoomDB->updateEntranceMap(this);
-    mpRoomDB->mpMap->mMapGraphNeedsUpdate = true;
+    mpMap->mMapGraphNeedsUpdate = true;
 }
 
 void TRoom::removeAllSpecialExitsToRoom( int _id )
@@ -587,7 +589,7 @@ void TRoom::removeAllSpecialExitsToRoom( int _id )
         pA->determineAreaExitsOfRoom( id );
     }
     mpRoomDB->updateEntranceMap(this);
-    mpRoomDB->mpMap->mMapGraphNeedsUpdate = true;
+    mpMap->mMapGraphNeedsUpdate = true;
 }
 
 void TRoom::calcRoomDimensions()

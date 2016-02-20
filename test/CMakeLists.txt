@@ -41,6 +41,29 @@ add_executable(example_gtest example_gtest.cpp)
 target_link_libraries(example_gtest gtest gmock_main)
 add_test(NAME example_gtest COMMAND example_gtest)
 
+add_executable(TArea_test TArea_test.cpp)
+target_link_libraries(TArea_test
+  gtest
+  gmock_main
+  mudletLib
+  ${Qt5Core_LIBRARIES}
+  ${Qt5Widgets_LIBRARIES}
+  ${Qt5Network_LIBRARIES}
+  ${Qt5Multimedia_LIBRARIES}
+  ${Qt5OpenGL_LIBRARIES}
+  ${Qt5UiTools_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${HUNSPELL_LIBRARIES}
+  ${LUA_LIBRARIES}
+  ${OPENGL_LIBRARIES}
+  ${PCRE_LIBRARIES}
+  ${YAJL_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  irccqt
+)
+
+add_test(NAME TArea_test COMMAND TArea_test)
+
 ############
 # Qt5Test
 ############

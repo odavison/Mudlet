@@ -53,7 +53,6 @@ SET(mudlet_SRCS
     HostManager.cpp
     KeyUnit.cpp
     LuaInterface.cpp
-    main.cpp
     mudlet.cpp
     ScriptUnit.cpp
     T2DMap.cpp
@@ -213,6 +212,10 @@ QT5_WRAP_CPP(mudlet_MOC_SRCS ${mudlet_MOC_HDRS})
 QT5_ADD_RESOURCES(mudlet_RCC_SRCS ${mudlet_RCCS})
 
 ADD_EXECUTABLE(mudlet WIN32
+    main.cpp
+)
+
+ADD_LIBRARY(mudletCore
     ${mudlet_SRCS}
     ${mudlet_MOC_SRCS}
     ${mudlet_RCC_SRCS}
@@ -222,6 +225,7 @@ ADD_EXECUTABLE(mudlet WIN32
 )
 
 TARGET_LINK_LIBRARIES(mudlet
+  mudletCore
     ${Qt5Core_LIBRARIES}
     ${Qt5Widgets_LIBRARIES}
     ${Qt5Network_LIBRARIES}

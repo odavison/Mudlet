@@ -3553,7 +3553,7 @@ int TLuaInterpreter::setRoomIDbyHash( lua_State *L )
         hash = lua_tostring( L, 2 );
     }
     Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
-    pHost->mpMap->mpRoomDB->hashTable[QString(hash.c_str())] = id;
+    pHost->mpMap->mpRoomDB->putRoomIDByHash( hash.c_str(), id );
     return 0;
 }
 
@@ -3573,9 +3573,10 @@ int TLuaInterpreter::getRoomIDbyHash( lua_State *L )
     Host * pHost = TLuaInterpreter::luaInterpreterMap[L];
     int retID = -1;
     QString _hash = hash.c_str();
-    if( pHost->mpMap->mpRoomDB->hashTable.contains( _hash ) )
+    int roomID = pHost->mpMap->mpRoomDB->getRoomIDByHash( _hash );
+    if( roomID > 0 )
     {
-        retID = pHost->mpMap->mpRoomDB->hashTable[_hash];
+        retID = roomID;
         lua_pushnumber( L, retID );
     }
     else

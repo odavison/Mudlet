@@ -419,7 +419,7 @@ void XMLimport::readRooms()
 
 void XMLimport::readRoom()
 {
-    TRoom * pT = new TRoom( mpHost->mpMap->mpRoomDB );
+    TRoom * pT = new TRoom( mpHost->mpMap.data(), mpHost->mpMap->mpRoomDB );
     pT->id = attributes().value("id").toString().toInt();
     pT->area = attributes().value("area").toString().toInt();
     pT->name = attributes().value("title").toString();
