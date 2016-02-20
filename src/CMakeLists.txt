@@ -225,21 +225,8 @@ ADD_LIBRARY(mudletCore
 )
 
 TARGET_LINK_LIBRARIES(mudlet
-  mudletCore
-    ${Qt5Core_LIBRARIES}
-    ${Qt5Widgets_LIBRARIES}
-    ${Qt5Network_LIBRARIES}
-    ${Qt5Multimedia_LIBRARIES}
-    ${Qt5OpenGL_LIBRARIES}
-    ${Qt5UiTools_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${HUNSPELL_LIBRARIES}
-    ${LUA_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${PCRE_LIBRARIES}
-    ${YAJL_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    irccqt
+    mudletCore
+    ${MUDLET_EXTERNAL_LIBS}
 )
 
 IF(PC_ZIP_FOUND)
