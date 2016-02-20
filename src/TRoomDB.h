@@ -93,46 +93,6 @@ class ConcreteTRoomDB: TRoomDB
 public:
     ConcreteTRoomDB( TMap * );
 
-    TRoom * getRoom( int id );
-    TArea * getArea( int id );
-//     int getArea( TArea * pA ); use duplicate int getAreaID( TArea * pA ) instead
-    bool addRoom( int id );
-    int size() { return rooms.size(); }
-    bool removeRoom( int );
-    void removeRoom( QList<int> & );
-    bool removeArea( int id );
-    bool removeArea( QString name );
-    void removeArea( TArea * );
-    bool addArea(int id);
-    int addArea( QString name );
-    bool addArea( int id, QString name );
-    bool setAreaName( int areaID, QString name );
-    const QList<TRoom *> getRoomPtrList();
-    const QList<TArea *> getAreaPtrList();
-    const QHash<int, TRoom *> & getRoomMap() const { return rooms; }
-    const QMap<int, TArea *> & getAreaMap() const { return areas; }
-    QList<int> getRoomIDList();
-    QList<int> getAreaIDList();
-    const QMap<int, QString> & getAreaNamesMap() const { return areaNamesMap; }
-    void updateEntranceMap(TRoom *, bool isMapLoading = false );
-    void updateEntranceMap(int);
-    const QMultiHash<int, int> & getEntranceHash() const { return entranceMap; }
-    void deleteValuesFromEntranceMap( int );
-    void deleteValuesFromEntranceMap( QSet<int> & );
-
-    void buildAreas();
-    void clearMapDB();
-    void initAreasForOldMaps();
-    void auditRooms();
-    bool addRoom(int id, TRoom *pR, bool isMapLoading = false);
-    int getAreaID(TArea * pA);
-    void restoreAreaMap( QDataStream & );
-    void restoreSingleArea( QDataStream &, int, TArea * );
-    void restoreSingleRoom( QDataStream &, int, TRoom * );
-    QMap<QString,int> hashTable;
-
-
-
 private:
     ConcreteTRoomDB(){};
     int createNewAreaID();
