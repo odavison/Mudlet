@@ -204,7 +204,7 @@ bool irc_is_utf8(const QByteArray& utf8)
             // a single Surrogate should not show in 3 bytes UTF8, instead,
             // the pair should be intepreted as one single UCS4 char and
             // encoded UTF8 in 4 bytes
-            if ((0xED == utf8[i]) && (0xA0 == (utf8[i+1] & 0xA0)))
+            if ((0xA0 == (utf8[i+1] & 0xA0)))
                 return false;
             // 0000 0000 - 0000 07FF : should encode in less bytes
             if ((0 == (utf8[i] & 0x0F)) && (0 == (utf8[i+1] & 0x20)))

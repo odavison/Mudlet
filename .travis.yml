@@ -1,22 +1,25 @@
 language: cpp
+sudo: true
 os:
   - osx
-#  - linux
+  - linux
 compiler:
   - gcc
-#  - clang
+  - clang
 env:
-#  - Q_OR_C_MAKE=qmake
+  - Q_OR_C_MAKE=qmake
   - Q_OR_C_MAKE=cmake
-#matrix:
-## Something goes wrong internally in Qt (5.0.2) for CMake Clang builds on Linux
-#    allow_failures:
-#    - os: linux
-#      compiler: clang
-#      env: Q_OR_C_MAKE=cmake
+matrix:
+# Something goes wrong internally in Qt (5.0.2) for CMake Clang builds on Linux
+    allow_failures:
+    - os: linux
+      compiler: clang
+      env: Q_OR_C_MAKE=cmake
 
-before_install: ./CI/travis.before_install.sh
-install: ./CI/travis.install.sh
+before_install:
+  - ./CI/travis.before_install.sh
+install:
+  - ./CI/travis.install.sh
 before_script:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then PATH="/usr/local/opt/qt5/bin:$PATH"; fi
   - mkdir build
