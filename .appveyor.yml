@@ -1,0 +1,16 @@
+version: 3.0.{build}
+
+enviornment:
+  matrix:
+    -ARCH: "x86_64"
+
+branches:
+    only:
+        - appveyor
+clone_folder: c:\projects\mudlet
+
+init:
+  - git config --global core.autocrlf input
+
+build_script:
+  - cmd: c:\msys64\usr\bin\sh --login /c/projects/mudlet/CI/appveyor.build.sh
